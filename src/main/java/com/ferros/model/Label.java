@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "labelPosts")
+@ToString()
 @Builder
 @Entity
 public class Label {
