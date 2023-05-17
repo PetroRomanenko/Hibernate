@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS post_writer
+(
+    post_id   INTEGER NOT NULL
+    CONSTRAINT fk_post
+    REFERENCES post (post_id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+    writer_id INTEGER NOT NULL
+    CONSTRAINT fk_writer
+    REFERENCES writer (writer_id)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);

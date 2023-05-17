@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS label
+(
+    label_id SERIAL PRIMARY KEY,
+    label VARCHAR(255) NOT NULL
+);
