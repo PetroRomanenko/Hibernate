@@ -1,6 +1,7 @@
 package com.ferros.view;
 
 import com.ferros.controller.WriterController;
+import com.ferros.exeptions.NoDataInDatabaseException;
 import com.ferros.model.Post;
 import com.ferros.model.Writer;
 
@@ -22,9 +23,11 @@ public class WriterView {
             6.Exit to previous menu""";
 
     public void createWriter() {
-
+        SCANNER.nextLine();
         System.out.println("Enter writer First Name: ");
         String firstName = SCANNER.nextLine();
+
+
 
         System.out.println("Enter writer Last Name: ");
         String lastName = SCANNER.nextLine();
@@ -41,10 +44,15 @@ public class WriterView {
         Integer lookedId = SCANNER.nextInt();
         SCANNER.skip("\n");
 
-        checkIfNoSuchWriterInDB(lookedId);
+        try {
+            Writer foundWriter = CONTROLLER.findWriterById(lookedId);
+            printWriter(foundWriter, "Desired Writer: ");
+        } catch (NoDataInDatabaseException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Try again");
+            menuChoice();
+        }
 
-        Writer foundWriter = CONTROLLER.findWriterById(lookedId);
-        printWriter(foundWriter, "Desired Writer: ");
 
     }
 
@@ -58,47 +66,41 @@ public class WriterView {
         Integer updatedWriterId = SCANNER.nextInt();
         SCANNER.skip("\n");
 
-        System.out.println("Enter new writer First Name: ");
-        String updatedFirstName = SCANNER.nextLine();
 
-        System.out.println("Enter new writer Last Name: ");
-        String updatedLastName = SCANNER.nextLine();
+        try {
+            System.out.println("Desired Author: " + CONTROLLER.findWriterById(updatedWriterId));
+            System.out.println("Enter new writer First Name: ");
+            String updatedFirstName = SCANNER.nextLine();
 
-        System.out.println("Enter number of post written by writer ");
-        Integer writtenPostID = SCANNER.nextInt();
-
-        checkIfNoSuchWriterInDB(updatedWriterId);
-
-        Writer updatedWriter = new Writer( updatedFirstName, updatedLastName);
-        updatedWriter.setId(updatedWriterId);
-        var updatedRetunedWriter = CONTROLLER.update(updatedWriter, writtenPostID);
-
-        printWriter(updatedRetunedWriter, "Updated Writer: ");
-
-        if (updatedRetunedWriter==null){
-            System.out.println("NO such writer choose again");
+            System.out.println("Enter new writer Last Name: ");
+            String updatedLastName = SCANNER.nextLine();
+            Writer writer = CONTROLLER.update(updatedFirstName, updatedLastName, updatedWriterId);
+            printWriter(writer, "Updated author");
+        } catch (NoDataInDatabaseException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Try again");
             menuChoice();
         }
     }
 
-    private void checkIfNoSuchWriterInDB(Integer searchedID) {
-        Writer writer = CONTROLLER.findWriterById(searchedID);
 
-        if (writer==null){
-            System.out.println("NO such writer choose again");
-            menuChoice();
-        }
-    }
 
     public void deleteWriterById() {
         System.out.println("Enter Writer Id: ");
         Integer deletedWriterID = SCANNER.nextInt();
         SCANNER.skip("\n");
-        checkIfNoSuchWriterInDB(deletedWriterID);
-        Writer writer = CONTROLLER.findWriterById(deletedWriterID);
-            CONTROLLER.deleteWriterById(deletedWriterID);
 
-        printWriter(writer, "Deleted Writer: ");
+        try{
+            Writer writer = CONTROLLER.findWriterById(deletedWriterID);
+            System.out.println("You`d like ti delete this Author: " + writer);
+            CONTROLLER.deleteWriterById(deletedWriterID);
+            printWriter(writer, "Deleted Writer: ");
+        } catch (NoDataInDatabaseException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Try again");
+            menuChoice();
+        }
+
 
 
 
@@ -128,16 +130,16 @@ public class WriterView {
 
 
     private void printWriter(Writer writer, String message) {
-        if(message!=null) {
+        if (message != null) {
             System.out.println(message);
         }
-        System.out.println("Writer id: "+writer.getId());
+        System.out.println("Writer id: " + writer.getId());
         System.out.println("Writer First Name: " + writer.getFirstName());
         System.out.println("Writer Last Name: " + writer.getLastName());
     }
 
-    private void printWriterList(List<Writer> writers){
-        for (Writer writer: writers){
+    private void printWriterList(List<Writer> writers) {
+        for (Writer writer : writers) {
             printWriter(writer, null);
         }
     }

@@ -4,25 +4,21 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
 @Entity
+@Table(name = "writers")
 public class Writer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "writer_id")
-    private int id;
+    private Integer id;
+    @Column(name = "first_name")
     private String firstName;
+    @Column(name = "last_name")
     private String lastName;
-
-    @ManyToMany
-    @JoinTable(
-            name = "post_writer",
-            joinColumns = @JoinColumn (name = "writer_id" ),
-            inverseJoinColumns = @JoinColumn(name = "post_id")
-    )
+    @OneToMany(mappedBy = "writer", fetch = FetchType.LAZY)
     private List<Post> posts;
 }

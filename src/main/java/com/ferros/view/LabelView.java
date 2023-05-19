@@ -1,13 +1,13 @@
 package com.ferros.view;
 
 import com.ferros.controller.LabelController;
+import com.ferros.exeptions.NoDataInDatabaseException;
 import com.ferros.model.Label;
 
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.SocketHandler;
 
-public class LabelView  {
+public class LabelView {
 
     private final Scanner scanner = new Scanner(System.in);
     private final LabelController controller = new LabelController();
@@ -28,24 +28,26 @@ public class LabelView  {
         scanner.nextLine();
         System.out.println("Enter name: ");
         String name = scanner.nextLine();
+        if (name!=null) {
 
-        Label createdLabel = controller.saveLabel(name);
-        if(createdLabel==null){
-            System.out.println("Unable to save such label");
-        }
+            Label createdLabel = controller.saveLabel(name);
 
-        printLabel(createdLabel, "Saved label: " );
+            printLabel(createdLabel, "Saved label: ");
+        }else System.out.println("Try again");
     }
 
     public void findLabelById() {
         System.out.println("Enter ID of desired Label: ");
         int lookedId = scanner.nextInt();
         scanner.skip("\n");
+        try {
 
-        Label findLabel = controller.findLabelById(lookedId);
-        if (findLabel!=null) {
-            printLabel(findLabel, "Your Label: ");
-        }else System.out.println("No Label with this "+ lookedId+ " try another one");;
+            Label findLabel = controller.findLabelById(lookedId);
+            printLabel(findLabel, "Label: ");
+        }catch (NoDataInDatabaseException e){
+            System.out.println(e.getMessage());
+            System.out.println("Try again");
+        }
     }
 
     public void showAllLabels() {
@@ -57,14 +59,19 @@ public class LabelView  {
         System.out.println("Enter Label id: ");
         int updatedLabelID = scanner.nextInt();
         scanner.skip("\n");
-        System.out.println("Desired Label: " + controller.findLabelById(updatedLabelID));
+        try {
+            System.out.println("Desired Label: " + controller.findLabelById(updatedLabelID));
 
 
-        System.out.println("Change name of Label: ");
-        String updatedLabelName = scanner.nextLine();
+            System.out.println("Change name of Label: ");
+            String updatedLabelName = scanner.nextLine();
 
-        Label updatedLabel = new Label(updatedLabelID, updatedLabelName);
-       printLabel(controller.update(updatedLabel)," Updated message");
+            Label updatedLabel = new Label(updatedLabelID, updatedLabelName);
+            printLabel(controller.update(updatedLabel)," Updated message");
+        }catch (NoDataInDatabaseException e){
+            System.out.println(e.getMessage());
+            System.out.println("Try again");
+        }
 
     }
 
@@ -72,9 +79,15 @@ public class LabelView  {
         System.out.println("Enter Label Id: ");
         int deletedLabelID = scanner.nextInt();
         scanner.skip("\n");
-        Label label = controller.findLabelById(deletedLabelID);
-        controller.deleteById(deletedLabelID);
-        printLabel(label , "Successfully deleted:");
+        try {
+            Label label = controller.findLabelById(deletedLabelID);
+            controller.deleteById(deletedLabelID);
+            printLabel(label , "Successfully deleted:");
+
+        }catch (NoDataInDatabaseException e){
+            System.out.println(e.getMessage());
+            System.out.println("Try again");
+        }
     }
 
     public void showMenuMassage() {
@@ -100,17 +113,16 @@ public class LabelView  {
 
     public void printList(List<Label> labelList){
         for (Label label:labelList  ) {
-            System.out.println(label);
+            printLabel(label,null);
         }
-
     }
 
     public void printLabel(Label label, String message){
-        if(message!=null&&label!=null) {
+        if(message!=null) {
             System.out.println(message);
-            System.out.print("Label id: " +label.getId()+"    ");
-            System.out.println("Label name: " +label.getName());
         }
+        System.out.print("Label id: " +label.getId()+"    ");
+        System.out.println("Label name: " +label.getName());
 
     }
 }

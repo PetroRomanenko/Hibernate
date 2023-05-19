@@ -6,7 +6,7 @@
   <session-factory>
     <property name="connection.url">jdbc:postgresql://localhost:5432/hibernate</property>
      <property name="connection.username">postgres</property>
-     <property name="connection.password">dr005764</property>
+     <property name="connection.password">Dr005764</property>
 
     <property name="connection.driver_class">org.postgresql.Driver</property>
     <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
@@ -19,11 +19,5 @@
    <mapping class="com.ferros.model.Post"/>
    <mapping class="com.ferros.model.Writer"/>
 
-
-    <!-- <property name="connection.username"/> -->
-    <!-- <property name="connection.password"/> -->
-
-    <!-- DB schema will be updated if needed -->
-    <!-- <property name="hibernate.hbm2ddl.auto">update</property> -->
   </session-factory>
 </hibernate-configuration>

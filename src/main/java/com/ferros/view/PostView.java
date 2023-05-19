@@ -1,16 +1,24 @@
 package com.ferros.view;
+
+import com.ferros.controller.LabelController;
 import com.ferros.controller.PostController;
+import com.ferros.controller.WriterController;
+import com.ferros.exeptions.NoDataInDatabaseException;
+import com.ferros.model.Label;
 import com.ferros.model.Post;
 import com.ferros.model.PostStatus;
+import com.ferros.model.Writer;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
 
 public class PostView {
     private Scanner scanner = new Scanner(System.in);
     private PostController controller = new PostController();
+    private LabelController labelController = new LabelController();
+    private WriterController writerController = new WriterController();
+
 
     private final String CRUDMassage = """
             Chose action in Post:\s
@@ -19,26 +27,74 @@ public class PostView {
             3.Show by ID\s
             4.Update\s
             5.Delete\s
-            6.Show list of label in Post\s
-            7.Exit to previous menu""";
+            6.Exit to previous menu""";
     private final String line = "****************************************";
+
+    public List<Label> getLabelsForThisPost() {
+        List<Label> labels = new ArrayList<>();
+        scanner.nextLine();
+        System.out.println("Choose label for this post: ");
+
+        System.out.println(labelController.getAllLabels());
+        System.out.println("Write id of label, to exit write 0:");
+        Integer id;
+        do {
+
+            id = scanner.nextInt();
+            if (id != 0) {
+                try {
+                    labels.add(labelController.findLabelById(id));
+                } catch (NoDataInDatabaseException e) {
+                    System.out.println(e.getMessage());
+                    menuChoice();
+                }
+            }
+        } while (id != 0);
+
+
+        return labels;
+    }
 
     public void createPost() {
         scanner.nextLine();
         System.out.println("Enter your Post: ");
         String content = scanner.nextLine();
+        System.out.println("Chose an writers id: ");
+        //ToDO написать метод для печати лейблов
+        printAllWriter();
+        Integer writer = scanner.nextInt();
+        List<Label> labels = getLabelsForThisPost();
+        if (content != null && writer != null) {
+            Post createdPost = controller.savePost(content, writer, labels);
+            System.out.println("Saved post: " + createdPost);
+        } else {
+            System.out.println("Try Again something goes wrong");
+            menuChoice();
+        }
+    }
 
-        Post createdPost = controller.savePost(content);
-        System.out.println("Saved post: " + createdPost);
+    private void printAllWriter() {
+        List<Writer> writers = writerController.getAllWriters();
+        for (Writer writer : writers) {
+            System.out.println("Writer id: " + writer.getId()
+                               + "Writer name: " + writer.getFirstName()
+                               + "Writer lastname: " + writer.getLastName());
+
+        }
     }
 
     public void findPostById() {
         System.out.println("Enter ID of desired Post: ");
         int lookedId = scanner.nextInt();
         scanner.skip("\n");
-
-        Post foundedPost = controller.findPostById(lookedId);
-        printPost(foundedPost, "You are looked for this post: ");
+        try {
+            Post foundedPost = controller.findPostById(lookedId);
+            printPost(foundedPost, "You are looked for this post: ");
+        } catch (NoDataInDatabaseException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Try again");
+            menuChoice();
+        }
     }
 
     public void showAllPosts() {
@@ -48,32 +104,25 @@ public class PostView {
     }
 
 
-
     public void updatePost() {
         System.out.println("Enter Post id: ");
         int updatedPostID = scanner.nextInt();
         scanner.skip("\n");
-        System.out.println("Desired Post: " + controller.findPostById(updatedPostID));
 
-        if(controller.findPostById(updatedPostID)!=null){
+        try {
+
+            System.out.println("Desired Post: " + controller.findPostById(updatedPostID));
             System.out.println("Change name of Post: ");
             String updatedPostName = scanner.nextLine();
+            if (updatedPostName != null) {
 
-            LabelView labelView = new LabelView();
+                Post post = controller.update(updatedPostName, updatedPostID);
+                printPost(post, "Updated post: ");
+            }
 
-            System.out.println("Chose id of Label: ");
-            labelView.showAllLabels();
-            Integer labelId = scanner.nextInt();
-            scanner.skip("\n");
-
-            Post updatedPost = controller.findPostById(updatedPostID);
-            updatedPost.setContent(updatedPostName);
-
-            updatedPost.setLabels(controller.getAllLabelsInThisPost(updatedPostID));
-            controller.update(updatedPost,labelId);
-            printPost(updatedPost,"Updated post: ");
-        }else {
-            System.out.println("Нет такого поста выберете еще раз");
+        } catch (NoDataInDatabaseException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Try again");
             menuChoice();
         }
 
@@ -84,35 +133,20 @@ public class PostView {
         System.out.println("Enter Post Id: ");
         int deletedPostID = scanner.nextInt();
         scanner.skip("\n");
-        if(controller.findPostById(deletedPostID)!=null) {
+        try {
+            controller.findPostById(deletedPostID);
             Post post = controller.findPostById(deletedPostID);
             post.setStatus(PostStatus.DELETED);
             controller.deletePostById(deletedPostID);
-            printPost(post,"Deleted Post");
-        }else {
-            System.out.println("Нет такого поста выберете еще раз");
+            printPost(post, "Deleted Post");
+
+        } catch (NoDataInDatabaseException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Try again");
             menuChoice();
         }
     }
 
-    private void getAllLabelInPost() {
-        System.out.println("Enter Post Id: ");
-        int postID = scanner.nextInt();
-        scanner.skip("\n");
-        if(controller.findPostById(postID)!=null) {
-            if (controller.getAllLabelsInThisPost(postID)!=null) {
-                LabelView labelView = new LabelView();
-                labelView.printList(controller.getAllLabelsInThisPost(postID));
-            }else {
-                System.out.println("У данного поста нет ЛЕйблов");
-            }
-
-        }else {
-            System.out.println("Нет такого поста выберете еще раз");
-            menuChoice();
-        }
-
-    }
 
     public void showMenuMassage() {
         System.out.println(line);
@@ -131,36 +165,40 @@ public class PostView {
                 case 3 -> findPostById();
                 case 4 -> updatePost();
                 case 5 -> deletePostByID();
-                case 6 -> getAllLabelInPost();
+
             }
-        } while (chose != 7);
+        } while (chose != 6);
 
 
     }
 
 
+    public void printPostList(List<Post> postList) {
 
-    public void printPostList(List<Post> postList){
-
-        for (Post post:postList  ) {
-            printPost(post,null);
+        for (Post post : postList) {
+            printPost(post, null);
+            System.out.println("------------------------------------");
         }
     }
 
-    public void printPost(Post post, String message){
-        if(message!=null) {
+    public void printPost(Post post, String message) {
+        if (message != null) {
             System.out.println(message);
         }
-        System.out.print("Post id: " +post.getId()+"    ");
-        System.out.println("Post content: " +post.getContent());
-        System.out.println("Post created: "+new Date(post.getCreated()));
-        if (post.getUpdated()!=null){
-            System.out.println("Post updated:" +new Date(post.getUpdated()));
+        System.out.print("Post id: " + post.getId() + "    ");
+        System.out.println("Post content: " + post.getContent());
+        System.out.println("Post created: " + post.getCreated());
+        if (post.getUpdated() != null) {
+            System.out.println("Post updated:" + post.getUpdated());
         }
         System.out.println("Post status: " + post.getStatus());
-        System.out.println("Labels in this post: ");
+        System.out.println("Post created by: " + post.getWriter().getFirstName() + " " + post.getWriter().getLastName());
         LabelView labelView = new LabelView();
-        labelView.printList(post.getLabels());
+        if (post.getLabels().isEmpty()) {
+        } else {
+            System.out.println("Labels in this post: ");
+            labelView.printList(post.getLabels());
+        }
     }
 
 }

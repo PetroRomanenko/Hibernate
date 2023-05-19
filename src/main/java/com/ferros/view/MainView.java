@@ -6,8 +6,8 @@ import java.util.Scanner;
 public class MainView {
 
     private final LabelView labelView = new LabelView();
-   /* private final PostView postView = new PostView();
-    private final WriterView writerView = new WriterView();*/
+    private final PostView postView = new PostView();
+    private final WriterView writerView = new WriterView();
     private final Scanner scanner = new Scanner(System.in);
 
 
@@ -26,12 +26,7 @@ public class MainView {
             System.out.println(line);
             System.out.println(menuMessage);
             System.out.println(line);
-//
-//            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in))){
-//                chose = Integer.parseInt(bufferedReader.readLine());
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
+
             chose = scanner.nextInt();
 
 
@@ -40,10 +35,10 @@ public class MainView {
                     labelView.menuChoice();
                     break;
                 case 2:
-//                    postView.menuChoice();
+                    postView.menuChoice();
                     break;
                 case 3:
-//                    writerView.menuChoice();
+                    writerView.menuChoice();
                     break;
                 case 4:
                     break;
@@ -53,10 +48,5 @@ public class MainView {
         }while (chose != 4) ;
         System.out.println("Thanks for using our Application");
         System.out.println("See you next time!!!!");
-
-
-    }
-
-
-
+   }
 }

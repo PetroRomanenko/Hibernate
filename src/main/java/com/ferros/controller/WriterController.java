@@ -1,48 +1,54 @@
 package com.ferros.controller;
 
-import com.ferros.model.Label;
+import com.ferros.exeptions.NoDataInDatabaseException;
 import com.ferros.model.Post;
 import com.ferros.model.Writer;
-import com.ferros.model.PostStatus;
-import com.ferros.repository.Hibernate.HibernatePostRepositoryImpl;
-import com.ferros.repository.Hibernate.HibernateWriterRepositoryImpl;
-import com.ferros.repository.PostRepository;
+import com.ferros.repository.hibernate.HibernateWriterRepositoryImpl;
 import com.ferros.repository.WriterRepository;
-import com.ferros.utils.HibernateUtil;
-import org.hibernate.SessionFactory;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 public class WriterController {
-    private SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
 
-    private WriterRepository writerRepository = new HibernateWriterRepositoryImpl(sessionFactory);
-    public Writer saveWriter(Writer writer){
+    private final WriterRepository writerRepository = new HibernateWriterRepositoryImpl();
+    public Writer saveWriter(String firstName, String lastName, List<Post> posts){
+        Writer writer = Writer.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .posts(posts)
+                .build();
 
         return writerRepository.save(writer);
 
 
     }
 
-    public Writer  findWriterById(Integer id){
-        Optional<Writer> optionalWriterResult = writerRepository.getById(id);
-        return optionalWriterResult.orElse(null);
+    public Writer  findWriterById(Integer id) throws NoDataInDatabaseException {
+        Writer writer= writerRepository.getById(id);
+        if (writer!=null){
+            return writer;
+        }else {
+            throw new NoDataInDatabaseException("No writer with current id:" +id );
+        }
+
 
     }
 
-    public List<Writer> getAllPosts(){
+    public List<Writer> getAllWriters(){
 
         return writerRepository.getAll();
     }
 
-    public Writer update(Writer writer){
-        writerRepository.update(writer);
-        return  writerRepository.getById(writer.getId()).orElse(null);
+    public Writer update(String firstName, String lastName, Integer id) throws NoDataInDatabaseException {
+        Writer writer = findWriterById(id);
+        writer.setFirstName(firstName);
+        writer.setLastName(lastName);
+
+        return writerRepository.update(writer);
     }
 
-    public void deletePostById(Integer id){
+    public void deleteWriterById(Integer id){
+
         writerRepository.deleteById(id);
     }
 

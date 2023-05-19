@@ -3,24 +3,18 @@ package com.ferros.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString()
+@ToString
 @Builder
 @Entity
+@Table(name = "labels")
 public class Label {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "label_id")
+    @Column(name = "id")
     private Integer id;
-    @Column(name = "label")
+    @Column(name = "name")
     private String name;
-
-//    @Builder.Default
-//    @OneToMany(mappedBy = "label")
-//    private List<LabelPost> labelPosts =new ArrayList<>();
 }

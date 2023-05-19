@@ -5,32 +5,34 @@ import lombok.*;
 
 import java.util.Date;
 import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "content")
-@ToString()
 @Builder
 @Entity
+@Table(name = "posts")
 public class Post {
     @Id
-    @Column(name = "post_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String content;
     private Date created;
     private Date updated;
-    private PostStatus postStatus;
+    @Enumerated(EnumType.STRING)
+    private PostStatus status;
 
-    @ManyToMany()
+    @ManyToOne
+    @JoinColumn(name = "writer_id")
+    @ToString.Exclude
+    private Writer writer;
+
+    @ManyToMany
     @JoinTable(
-            name="label_post",
-            joinColumns = @JoinColumn (name = "post_id"),
-            inverseJoinColumns = @JoinColumn (name = "label_id")
+            name = "label_posts",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "label_id")
     )
+    @ToString.Exclude
     private List<Label> labels;
-
-
-
-
 }
